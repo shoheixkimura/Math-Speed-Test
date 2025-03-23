@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>計算スピードテスト</title>
+    <style>
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .problem-display {
+        font-size: 32px;
+        text-align: center;
+        margin: 30px 0;
+        font-weight: bold;
+        min-height: 50px;
+      }
+      .category-title {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 20px;
+      }
+      .input-area {
+        text-align: center;
+        margin: 20px 0;
+      }
+      #answer {
+        font-size: 24px;
+        padding: 10px;
+        width: 120px;
+        text-align: center;
+        border: 2px solid #3498db;
+        border-radius: 5px;
+      }
+      .btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 18px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px;
+        transition: background-color 0.3s;
+      }
+      .btn:hover {
+        background-color: #2980b9;
+      }
+      .btn:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+      }
+      #progress {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 16px;
+        color: #7f8c8d;
+      }
+      #result-area {
+        display: none;
+        margin-top: 30px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .category-header {
+        background-color: #3498db;
+        color: white;
+        font-weight: bold;
+      }
+      .correct {
+        color: #27ae60;
+      }
+      .incorrect {
+        color: #e74c3c;
+      }
+      .restart-container {
+        text-align: center;
+        margin-top: 30px;
+      }
+      .summary-stats {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        margin: 20px 0;
+      }
+      .stat-box {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        min-width: 200px;
+      }
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin: 10px 0;
+      }
+      .stat-label {
+        color: #7f8c8d;
+      }
+      .score-indicator {
+        font-weight: bold;
+      }
+      #start-screen {
+        text-align: center;
+      }
+      .instructions {
+        text-align: left;
+        margin: 20px 0;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>計算スピードテスト</h1>
+
+      <div id="start-screen">
+        <div class="instructions">
+          <p>
+            このテストは、さこのさまざまなパターンの計算スピードを測定します。各カテゴリーに5問ずつ、全30問あります。苦手なジャンルの計算を特定し、トレーニングすることが狙いです。
+          </p>
+          <p><strong>テストのカテゴリー:</strong></p>
+          <ol>
+            <li>足し算 タイプA</li>
+            <li>足し算 タイプB</li>
+            <li>足し算 タイプC</li>
+            <li>引き算 タイプA</li>
+            <li>引き算 タイプB</li>
+            <li>引き算 タイプC</li>
+          </ol>
+          <p>
+            「スタート」ボタンをクリックするとテストが始まります。各問題に答えたら「次へ」をクリックしてください。
+          </p>
+          <p>
+            テスト終了後、各パターンでの解答時間や正確さの詳細な分析が表示されます。
+          </p>
+        </div>
+        <button id="start-btn" class="btn">スタート</button>
+      </div>
+
+      <div id="test-area" style="display: none">
+        <div class="category-title" id="category-display"></div>
+        <div class="problem-display" id="problem"></div>
+        <div class="input-area">
+          <input type="number" id="answer" autocomplete="off" />
+          <div>
+            <button id="next-btn" class="btn">次へ</button>
+          </div>
+        </div>
+        <div id="progress">問題 1/30</div>
+      </div>
+
+      <div id="result-area">
+        <h2>テスト結果</h2>
+
+        <div class="summary-stats">
+          <div class="stat-box">
+            <div class="stat-label">平均解答時間</div>
+            <div class="stat-value" id="avg-time">-</div>
+            <div class="score-indicator" id="time-rating"></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">正答率</div>
+            <div class="stat-value" id="accuracy">-</div>
+            <div class="score-indicator" id="accuracy-rating"></div>
+          </div>
+        </div>
+
+        <h3>カテゴリー別分析</h3>
+        <table id="category-results">
+          <thead>
+            <tr>
+              <th>カテゴリー</th>
+              <th>平均時間(秒)</th>
+              <th>正答数</th>
+              <th>評価</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h3>問題別詳細</h3>
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>問題</th>
+              <th>あなたの回答</th>
+              <th>正解</th>
+              <th>結果</th>
+              <th>時間(秒)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h3>苦手パターンの分析</h3>
+        <div id="weakness-analysis"></div>
+
+        <div class="restart-container">
+          <input type="text" id="name-input" placeholder="名前を入力" />
+          <button id="save-btn" class="btn">結果を保存</button>
+          <button id="restart-btn" class="btn">もう一度挑戦する</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 問題カテゴリーの定義（カテゴリー名を変更）
+      const problemCategories = {
+        "A. 足し算 タイプA": {
+          generateProblem: function () {
+            // 繰り上がりなしの加算
+            let a = Math.floor(Math.random() * 8) + 1; // 1-8
+            let b = Math.floor(Math.random() * 9) + 1; // 1-9
+            let c = Math.floor(Math.random() * (9 - b)) + 1; // 1-(9-b)
+            let d = Math.floor(Math.random() * 9) + 1; // 1-9
+
+            let num1 = a * 10 + b;
+            let num2 = c * 10 + d;
+
+            return {
+              problem: `${num1} + ${num2}`,
+              answer: num1 + num2,
+            };
+          },
+        },
+        "B. 足し算 タイプB": {
+          generateProblem: function () {
+            // 繰り上がり1回の加算
+            let a = Math.floor(Math.random() * 8) + 1; // 1-8
+            let b = Math.floor(Math.random() * 5) + 5; // 5-9
+            let c = Math.floor(Math.random() * 9) + 1; // 1-9
+            let d = Math.floor(Math.random() * (10 - b)) + 1; // 1-(10-b)
+
+            let num1 = a * 10 + b;
+            let num2 = c * 10 + d;
+
+            return {
+              problem: `${num1} + ${num2}`,
+              answer: num1 + num2,
+            };
+          },
+        },
+        "C. 足し算 タイプC": {
+          generateProblem: function () {
+            // 繰り上がり複数回の加算
+            let a = Math.floor(Math.random() * 5) + 5; // 5-9
+            let b = Math.floor(Math.random() * 5) + 5; // 5-9
+            let c = Math.floor(Math.random() * 5) + 5; // 5-9
+            let d = Math.floor(Math.random() * 5) + 5; // 5-9
+
+            let num1 = a * 10 + b;
+            let num2 = c * 10 + d;
+
+            return {
+              problem: `${num1} + ${num2}`,
+              answer: num1 + num2,
+            };
+          },
+        },
+        "D. 引き算 タイプA": {
+          generateProblem: function () {
+            // 繰り下がりなしの減算
+            let a = Math.floor(Math.random() * 9) + 1; // 1-9
+            let b = Math.floor(Math.random() * 9) + 1; // 1-9
+            let c = Math.floor(Math.random() * a) + 1; // 1-a
+            let d = Math.floor(Math.random() * b) + 1; // 1-b
+
+            let num1 = a * 10 + b;
+            let num2 = c * 10 + d;
+
+            return {
+              problem: `${num1} - ${num2}`,
+              answer: num1 - num2,
+            };
+          },
+        },
+        "E. 引き算 タイプB": {
+          generateProblem: function () {
+            // 繰り下がり1回の減算
+            let a = Math.floor(Math.random() * 9) + 1; // 1-9
+            let b = Math.floor(Math.random() * 9) + 1; // 1-9
+            let c = Math.floor(Math.random() * a) + 1; // 1-a
+            let d = Math.floor(Math.random() * 9) + b + 1; // (b+1)-10
+            if (d > 9) d = Math.floor(Math.random() * 9) + 1; // 修正
+
+            let num1 = a * 10 + b;
+            let num2 = c * 10 + d;
+
+            return {
+              problem: `${num1} - ${num2}`,
+              answer: num1 - num2,
+            };
+          },
+        },
+        "F. 引き算 タイプC": {
+          generateProblem: function () {
+            // 繰り下がり複数回の減算
+            // 3桁の数から3桁の数を引く
+            let a = Math.floor(Math.random() * 9) + 1; // 1-9
+            let b = Math.floor(Math.random() * 9) + 1; // 1-9
+            let c = Math.floor(Math.random() * 9) + 1; // 1-9
+
+            // 各位が繰り下がりが発生するような引く数を作る
+            let num1 = a * 100 + b * 10 + c;
+
+            // 引く数の各位を計算
+            let d = Math.floor(Math.random() * a) + 1; // 1-a
+            let e = Math.floor(Math.random() * 9) + b + 1; // より大きくして繰り下がりを発生させる
+            if (e > 9) e = Math.floor(Math.random() * 9) + 1;
+            let f = Math.floor(Math.random() * 9) + c + 1; // より大きくして繰り下がりを発生させる
+            if (f > 9) f = Math.floor(Math.random() * 9) + 1;
+
+            let num2 = d * 100 + e * 10 + f;
+
+            return {
+              problem: `${num1} - ${num2}`,
+              answer: num1 - num2,
+            };
+          },
+        },
+      };
+
+      // 変数の初期化
+      let allProblems = [];
+      let currentProblemIndex = 0;
+      let startTime;
+      let results = [];
+      let currentCategory = "";
+
+      // DOM要素の取得
+      const startScreen = document.getElementById("start-screen");
+      const testArea = document.getElementById("test-area");
+      const resultArea = document.getElementById("result-area");
+      const problemDisplay = document.getElementById("problem");
+      const categoryDisplay = document.getElementById("category-display");
+      const answerInput = document.getElementById("answer");
+      const nextBtn = document.getElementById("next-btn");
+      const progressDisplay = document.getElementById("progress");
+      const startBtn = document.getElementById("start-btn");
+      const restartBtn = document.getElementById("restart-btn");
+      const saveBtn = document.getElementById("save-btn");
+
+      // 問題を生成する
+      function generateProblems() {
+        allProblems = [];
+
+        // 各カテゴリーで5問ずつ生成
+        for (const category in problemCategories) {
+          for (let i = 0; i < 5; i++) {
+            const problemObj = problemCategories[category].generateProblem();
+            allProblems.push({
+              ...problemObj,
+              category: category,
+            });
+          }
+        }
+
+        // 問題の順序をシャッフル
+        for (let i = allProblems.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [allProblems[i], allProblems[j]] = [allProblems[j], allProblems[i]];
+        }
+      }
+
+      // テストを開始する
+      function startTest() {
+        generateProblems();
+        results = [];
+        currentProblemIndex = 0;
+        startScreen.style.display = "none";
+        testArea.style.display = "block";
+        resultArea.style.display = "none";
+        showNextProblem();
+      }
+
+      // 次の問題を表示する
+      function showNextProblem() {
+        if (currentProblemIndex < allProblems.length) {
+          const problem = allProblems[currentProblemIndex];
+
+          // 新しいカテゴリーに入った場合は表示を更新
+          if (problem.category !== currentCategory) {
+            currentCategory = problem.category;
+            categoryDisplay.textContent = currentCategory;
+          }
+
+          problemDisplay.textContent = problem.problem;
+          answerInput.value = "";
+          answerInput.focus();
+          progressDisplay.textContent = `問題 ${currentProblemIndex + 1}/${
+            allProblems.length
+          }`;
+          startTime = new Date();
+        } else {
+          showResults();
+        }
+      }
+
+      // 回答を処理する
+      function processAnswer() {
+        const endTime = new Date();
+        const timeSpent = (endTime - startTime) / 1000; // 秒単位
+
+        const currentProblem = allProblems[currentProblemIndex];
+        const userAnswer = parseInt(answerInput.value);
+        const isCorrect = userAnswer === currentProblem.answer;
+
+        results.push({
+          problemIndex: currentProblemIndex + 1,
+          problem: currentProblem.problem,
+          userAnswer: userAnswer,
+          correctAnswer: currentProblem.answer,
+          correct: isCorrect,
+          time: timeSpent,
+          category: currentProblem.category,
+        });
+
+        currentProblemIndex++;
+        showNextProblem();
+      }
+
+      // 結果を表示する
+      function showResults() {
+        testArea.style.display = "none";
+        resultArea.style.display = "block";
+
+        // 総合結果の計算
+        const totalTime = results.reduce((sum, result) => sum + result.time, 0);
+        const avgTime = totalTime / results.length;
+        const correctCount = results.filter((result) => result.correct).length;
+        const accuracy = (correctCount / results.length) * 100;
+
+        // 総合結果の表示
+        document.getElementById("avg-time").textContent =
+          avgTime.toFixed(2) + "秒";
+        document.getElementById("accuracy").textContent =
+          accuracy.toFixed(1) + "%";
+
+        // 評価の表示
+        let timeRating = "";
+        if (avgTime < 3) timeRating = "非常に速い！";
+        else if (avgTime < 5) timeRating = "速い";
+        else if (avgTime < 8) timeRating = "普通";
+        else if (avgTime < 12) timeRating = "少し遅い";
+        else timeRating = "遅い";
+
+        let accuracyRating = "";
+        if (accuracy > 95) accuracyRating = "素晴らしい！";
+        else if (accuracy > 85) accuracyRating = "良い";
+        else if (accuracy > 75) accuracyRating = "普通";
+        else if (accuracy > 65) accuracyRating = "改善の余地あり";
+        else accuracyRating = "要練習";
+
+        document.getElementById("time-rating").textContent = timeRating;
+        document.getElementById("accuracy-rating").textContent = accuracyRating;
+
+        // カテゴリー別の結果を計算して表示
+        const categoryStats = {};
+
+        for (const category in problemCategories) {
+          const categoryResults = results.filter(
+            (r) => r.category === category
+          );
+          const categoryTime = categoryResults.reduce(
+            (sum, r) => sum + r.time,
+            0
+          );
+          const categoryAvgTime = categoryTime / categoryResults.length;
+          const categoryCorrect = categoryResults.filter(
+            (r) => r.correct
+          ).length;
+
+          categoryStats[category] = {
+            avgTime: categoryAvgTime,
+            correctCount: categoryCorrect,
+            total: categoryResults.length,
+          };
+        }
+
+        // カテゴリー別結果テーブルを作成
+        const categoryTable = document
+          .getElementById("category-results")
+          .getElementsByTagName("tbody")[0];
+        categoryTable.innerHTML = "";
+
+        for (const category in categoryStats) {
+          const stats = categoryStats[category];
+          let evaluation = "";
+
+          if (stats.avgTime < 3) evaluation = "非常に速い";
+          else if (stats.avgTime < 5) evaluation = "速い";
+          else if (stats.avgTime < 8) evaluation = "普通";
+          else if (stats.avgTime < 12) evaluation = "少し遅い";
+          else evaluation = "遅い";
+
+          if (stats.correctCount < stats.total * 0.7) {
+            evaluation += "（正確性に課題あり）";
+          }
+
+          const row = categoryTable.insertRow();
+          row.innerHTML = `
+                    <td>${category}</td>
+                    <td>${stats.avgTime.toFixed(2)}</td>
+                    <td>${stats.correctCount}/${stats.total}</td>
+                    <td>${evaluation}</td>
+                `;
+        }
+
+        // 詳細結果テーブルを作成
+        const resultsTable = document
+          .getElementById("results-table")
+          .getElementsByTagName("tbody")[0];
+        resultsTable.innerHTML = "";
+
+        results.forEach((result) => {
+          const row = resultsTable.insertRow();
+          const categoryShort = result.category.split(".")[0];
+          row.innerHTML = `
+                    <td>${result.problemIndex}</td>
+                    <td>${result.problem} (${categoryShort})</td>
+                    <td>${
+                      isNaN(result.userAnswer) ? "-" : result.userAnswer
+                    }</td>
+                    <td>${result.correctAnswer}</td>
+                    <td class="${result.correct ? "correct" : "incorrect"}">${
+            result.correct ? "○" : "×"
+          }</td>
+                    <td>${result.time.toFixed(2)}</td>
+                `;
+        });
+
+        // 苦手パターンの分析
+        const weaknessAnalysis = document.getElementById("weakness-analysis");
+        weaknessAnalysis.innerHTML = "";
+
+        // 平均時間が長いカテゴリーを特定
+        const sortedCategories = Object.keys(categoryStats).sort(
+          (a, b) => categoryStats[b].avgTime - categoryStats[a].avgTime
+        );
+
+        // 正答率が低いカテゴリーを特定
+        const lowAccuracyCategories = Object.keys(categoryStats).filter(
+          (cat) =>
+            categoryStats[cat].correctCount / categoryStats[cat].total < 0.8
+        );
+
+        let analysisHtml = "<p><strong>時間がかかっているパターン:</strong> ";
+        if (sortedCategories.length > 0) {
+          analysisHtml += `${sortedCategories[0]}（平均${categoryStats[
+            sortedCategories[0]
+          ].avgTime.toFixed(2)}秒）`;
+          if (sortedCategories.length > 1) {
+            analysisHtml += `、${sortedCategories[1]}（平均${categoryStats[
+              sortedCategories[1]
+            ].avgTime.toFixed(2)}秒）`;
+          }
+        }
+        analysisHtml += "</p>";
+
+        if (lowAccuracyCategories.length > 0) {
+          analysisHtml += "<p><strong>正確性に課題があるパターン:</strong> ";
+          analysisHtml += lowAccuracyCategories
+            .map((cat) => {
+              const accuracy =
+                (categoryStats[cat].correctCount / categoryStats[cat].total) *
+                100;
+              return `${cat}（正答率${accuracy.toFixed(1)}%）`;
+            })
+            .join("、");
+          analysisHtml += "</p>";
+        }
+
+        // 練習アドバイスを追加
+        analysisHtml += "<p><strong>練習アドバイス:</strong> ";
+
+        if (sortedCategories.length > 0) {
+          const worstCategory = sortedCategories[0];
+          if (
+            worstCategory.includes("タイプC") &&
+            worstCategory.includes("足し算")
+          ) {
+            analysisHtml +=
+              "足し算タイプCでは、位ごとに分けて考える練習をしましょう。例えば 67+58 なら、(60+50)+(7+8) のように分解して計算するとスピードアップできます。";
+          } else if (worstCategory.includes("引き算")) {
+            analysisHtml +=
+              "引き算の計算では、計算手順を明確に意識して練習しましょう。頭の中での計算手順を強化するとよいでしょう。";
+          } else if (
+            worstCategory.includes("タイプB") &&
+            worstCategory.includes("足し算")
+          ) {
+            analysisHtml +=
+              "足し算タイプBでは、特定のパターンに慣れることが大切です。7+5, 8+3, 9+4 などの組み合わせを集中的に練習するとよいでしょう。";
+          }
+        }
+
+        if (accuracy < 80) {
+          analysisHtml +=
+            "正確性を高めるために、ゆっくりでも正確に答える練習から始め、徐々にスピードを上げていくとよいでしょう。";
+        }
+
+        weaknessAnalysis.innerHTML = analysisHtml;
+      }
+
+      // 結果をJSONとして保存する
+      function saveResultsAsJson() {
+        const nameInput = document.getElementById("name-input");
+        const name = nameInput.value.trim();
+
+        // 名前のバリデーション
+        const nameRegex = /^[a-zA-Z]+$/;
+        if (!nameRegex.test(name)) {
+          alert("英字のみを入力してください。");
+          return;
+        }
+
+        // 結果データを作成
+        const resultData = {
+          timestamp: new Date().toISOString(),
+          summary: {
+            avgTime:
+              results.reduce((sum, r) => sum + r.time, 0) / results.length,
+            accuracy:
+              (results.filter((r) => r.correct).length / results.length) * 100,
+          },
+          categoryStats: {},
+          problems: results,
+        };
+
+        // カテゴリー別統計を計算
+        for (const category in problemCategories) {
+          const categoryResults = results.filter(
+            (r) => r.category === category
+          );
+          if (categoryResults.length > 0) {
+            resultData.categoryStats[category] = {
+              avgTime:
+                categoryResults.reduce((sum, r) => sum + r.time, 0) /
+                categoryResults.length,
+              correctCount: categoryResults.filter((r) => r.correct).length,
+              total: categoryResults.length,
+            };
+          }
+        }
+
+        // JSONに変換
+        const jsonStr = JSON.stringify(resultData, null, 2);
+
+        // JSONファイルとして保存
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        // 現在の日時をファイル名に使用
+        const date = new Date();
+        const fileName = `${name}_math_test_result_${date.getFullYear()}${(
+          date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}_${date
+          .getHours()
+          .toString()
+          .padStart(2, "0")}${date
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}.json`;
+
+        // ダウンロードリンクを作成してクリック
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+
+        // クリーンアップ
+        setTimeout(() => {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }, 0);
+      }
+
+      // イベントリスナーの設定
+      startBtn.addEventListener("click", startTest);
+      restartBtn.addEventListener("click", startTest);
+      saveBtn.addEventListener("click", saveResultsAsJson);
+
+      nextBtn.addEventListener("click", processAnswer);
+
+      answerInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          processAnswer();
+        }
+      });
+    </script>
+  </body>
+</html>
