@@ -28,7 +28,8 @@
 `math-speed-test-improved.html`ファイルをブラウザで開くだけで使用できます。
 
 ## ライセンス
-このプロジェクトは、MITライセンスの下で公開されています。詳細はLICENSEファイルを参照してください。
+このプロジェクトは、MITライセンスの下で公開されています。
+詳細はLICENSEファイルを参照してください。
 
 ## 作者
 - [Shohei Kimura](https://github.com/shoheixkimura)
